@@ -97,7 +97,7 @@ public class Controller implements Initializable {
     /** метод работы: подключение к серверу, цикл аутентификации, цикл работы*/
     private void connect() {
 
-//        MessagesHistory messagesHistory = new MessagesHistory();
+        MessagesHistory messagesHistory = new MessagesHistory();
         try {
 
             socket = new Socket(IP_ADDRESS, PORT);
@@ -118,15 +118,15 @@ public class Controller implements Initializable {
                                 String[] token = str.split("\\s");
                                 nickname = token[1];
                                 loginForHistory = token[2];
-//                                MessagesHistory t = new MessagesHistory();
-//                                try {
-//
-//                                    System.out.println(messagesHistory.readerHistoryUserFiletxt(loginForHistory));
-//                                } catch (IOException e) {
-//                                    e.printStackTrace();
-//                                }
+                                MessagesHistory t = new MessagesHistory();
+                                try {
+
+                                    System.out.println(messagesHistory.readerHistoryUserFiletxt(loginForHistory));
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
                                 setAuthenticated(true);
-//                                textArea.appendText(messagesHistory.readerHistoryUserFiletxt(loginForHistory));
+                                textArea.appendText(messagesHistory.readerHistoryUserFiletxt(loginForHistory));
                                 break;
 
                             }
@@ -134,7 +134,7 @@ public class Controller implements Initializable {
                             if(str.startsWith(Command.REG_OK)){
                                 String[] token = str.split("\\s");
                                 loginForHistory = token[1];
-//                                messagesHistory.createHistoryUserFiletxt(loginForHistory);
+                                messagesHistory.createHistoryUserFiletxt(loginForHistory);
                                 regController.setResultTryToReg(Command.REG_OK);
                             }
 
@@ -153,7 +153,7 @@ public class Controller implements Initializable {
                             if (str.equals(Command.END)) {
 
                                 System.out.println("Client disconnected");
-//                                messagesHistory.closeWriteHistoryUserFiletxt();
+                                messagesHistory.closeWriteHistoryUserFiletxt();
                                 break;
                             }
                             if (str.startsWith(Command.CLIENT_LIST)) {
@@ -176,7 +176,7 @@ public class Controller implements Initializable {
                         } else {
                             textArea.appendText(str + "\n");
 
-//                            messagesHistory.writeHistoryUserFiletxt(loginForHistory, str + "\n");
+                            messagesHistory.writeHistoryUserFiletxt(loginForHistory, str + "\n");
 
                         }
                     }
