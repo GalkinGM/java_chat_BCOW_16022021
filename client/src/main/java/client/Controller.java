@@ -97,7 +97,7 @@ public class Controller implements Initializable {
     /** метод работы: подключение к серверу, цикл аутентификации, цикл работы*/
     private void connect() {
 
-        MessagesHistory writeMessagesHistory = new MessagesHistory();
+        MessagesHistory messagesHistory = new MessagesHistory();
         try {
 
             socket = new Socket(IP_ADDRESS, PORT);
@@ -121,17 +121,20 @@ public class Controller implements Initializable {
                                 MessagesHistory t = new MessagesHistory();
                                 try {
 
-                                    System.out.println(t.readerHistoryUserFiletxt(loginForHistory));
+                                    System.out.println(messagesHistory.readerHistoryUserFiletxt(loginForHistory));
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
                                 setAuthenticated(true);
-                                textArea.appendText(t.readerHistoryUserFiletxt(loginForHistory));
+                                textArea.appendText(messagesHistory.readerHistoryUserFiletxt(loginForHistory));
                                 break;
 
                             }
 
-                            if(str.equals(Command.REG_OK)){
+                            if(str.startsWith(Command.REG_OK)){
+                                String[] token = str.split("\\s");
+                                loginForHistory = token[1];
+                                messagesHistory.createHistoryUserFiletxt(loginForHistory);
                                 regController.setResultTryToReg(Command.REG_OK);
                             }
 
@@ -150,7 +153,7 @@ public class Controller implements Initializable {
                             if (str.equals(Command.END)) {
 
                                 System.out.println("Client disconnected");
-                                writeMessagesHistory.closeWriteHistoryUserFiletxt();
+                                messagesHistory.closeWriteHistoryUserFiletxt();
                                 break;
                             }
                             if (str.startsWith(Command.CLIENT_LIST)) {
@@ -173,7 +176,7 @@ public class Controller implements Initializable {
                         } else {
                             textArea.appendText(str + "\n");
 
-                            writeMessagesHistory.writeHistoryUserFiletxt(loginForHistory, str + "\n");
+                            messagesHistory.writeHistoryUserFiletxt(loginForHistory, str + "\n");
 
                         }
                     }

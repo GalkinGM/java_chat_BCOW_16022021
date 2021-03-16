@@ -77,7 +77,7 @@ public class ClientHandler {
                             boolean regSuccess = server.getAuthService()
                                     .registration(token[1], token[2], token[3]);
                             if (regSuccess) {
-                                sendMsg(Command.REG_OK);
+                                sendMsg(Command.REG_OK+" "+token[1]);
                             } else {
                                 sendMsg(Command.REG_NO);
                             }

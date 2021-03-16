@@ -18,12 +18,21 @@ public class MessagesHistory {
         return "client/messagesHistory/history_" + login + ".txt";
     }
 
+    /** метод который создает файл с историей клиента*/
+    public void createHistoryUserFiletxt (String login) throws IOException {
+        File file = new File (getNameFiletxt(login));
+        if(file.createNewFile()){
+            System.out.println("file.txt файл создан в директории messagesHistory");
+        }else System.out.println("file.txt файл уже существует");
+
+    }
+
     /**
      * метод который создает файл с историей клиента и записывает в файл историю переписки юзера
      */
     public void writeHistoryUserFiletxt(String login, String srt) throws IOException {
-            fileOutputStream = new FileOutputStream(getNameFiletxt(login), true);
-            fileOutputStream.write(srt.getBytes());
+        fileOutputStream = new FileOutputStream(getNameFiletxt(login), true);
+        fileOutputStream.write(srt.getBytes());
 
     }
 
@@ -43,13 +52,14 @@ public class MessagesHistory {
         StringBuilder stringBuilder = new StringBuilder();
 
         List<String> lines = Files.readAllLines(Paths.get(getNameFiletxt(login)), UTF_8);
+        if (lines.size()==0){return "";}
         if (lines.size() > 5) {
             for (int i = lines.size() - 5; i < lines.size(); i++) {
                 stringBuilder.append(lines.get(i)).append("\n");
             }
         } else
             for (int i = 0; i < lines.size(); i++) {
-                stringBuilder.append(lines.get(i));
+                stringBuilder.append(lines.get(i)).append("\n");
             }
 
 //        for (String s: lines) {
@@ -59,14 +69,7 @@ public class MessagesHistory {
     }
 
 
-//    /** метод который создает файл с историей клиента*/
-//    public static void createHistoryUserFiletxt () throws IOException {
-//        File file = new File (getNameFiletxt("r"));
-//        if(file.createNewFile()){
-//            System.out.println("file.txt файл создан в директории messagesHistory");
-//        }else System.out.println("file.txt файл уже существует");
-//
-//    }
+
 
 //    public static void main(String[] args) {
 //        MessagesHistory w = new MessagesHistory();
