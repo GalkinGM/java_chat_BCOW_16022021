@@ -49,10 +49,15 @@ public class Controller implements Initializable {
 
     private boolean authenticated;
     private String nickname;
+    private String login;
     private Stage stage;
     private Stage regStage;
     private RegController regController;
+    private Stage chengNickNameStage;
+    private ChengNickNameController chengNickNameController;
+    private String loginForHistory;
 
+    /** сеттеры*/
     public void setAuthenticated(boolean authenticated) {
         this.authenticated = authenticated;
         msgPanel.setVisible(authenticated);
@@ -63,7 +68,9 @@ public class Controller implements Initializable {
         clientList.setManaged(authenticated);
 
         if (!authenticated) {
+
             nickname = "";
+
         }
         textArea.clear();
         setTitle(nickname);
@@ -87,8 +94,12 @@ public class Controller implements Initializable {
         setAuthenticated(false);
     }
 
+    /** метод работы: подключение к серверу, цикл аутентификации, цикл работы*/
     private void connect() {
+
+        MessagesHistory writeMessagesHistory = new MessagesHistory();
         try {
+
             socket = new Socket(IP_ADDRESS, PORT);
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
@@ -106,8 +117,18 @@ public class Controller implements Initializable {
                             if (str.startsWith(Command.AUTH_OK)) {
                                 String[] token = str.split("\\s");
                                 nickname = token[1];
+                                loginForHistory = token[2];
+                                MessagesHistory t = new MessagesHistory();
+                                try {
+
+                                    System.out.println(t.readerHistoryUserFiletxt(loginForHistory));
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
                                 setAuthenticated(true);
+                                textArea.appendText(t.readerHistoryUserFiletxt(loginForHistory));
                                 break;
+
                             }
 
                             if(str.equals(Command.REG_OK)){
@@ -127,7 +148,9 @@ public class Controller implements Initializable {
 
                         if (str.startsWith("/")) {
                             if (str.equals(Command.END)) {
+
                                 System.out.println("Client disconnected");
+                                writeMessagesHistory.closeWriteHistoryUserFiletxt();
                                 break;
                             }
                             if (str.startsWith(Command.CLIENT_LIST)) {
@@ -149,15 +172,20 @@ public class Controller implements Initializable {
 
                         } else {
                             textArea.appendText(str + "\n");
+
+                            writeMessagesHistory.writeHistoryUserFiletxt(loginForHistory, str + "\n");
+
                         }
                     }
                 } catch (RuntimeException e) {
                     System.out.println(e.getMessage());
                 } catch (IOException e) {
                     e.printStackTrace();
-                } finally {
+                }
+                finally {
                     setAuthenticated(false);
                     try {
+
                         socket.close();
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -171,6 +199,8 @@ public class Controller implements Initializable {
         }
     }
 
+
+    /** метод отправляет сообщения на сервер*/
     public void sendMsg(ActionEvent actionEvent) {
         try {
             out.writeUTF(textField.getText());
@@ -181,11 +211,11 @@ public class Controller implements Initializable {
         }
     }
 
+    /** метод отправляет сообщение на сервер с логином и паролем для аутентификации*/
     public void tryToAuth(ActionEvent actionEvent) {
         if (socket == null || socket.isClosed()) {
             connect();
         }
-
         try {
             out.writeUTF(String.format("%s %s %s", Command.AUTH, loginField.getText().trim(), passwordField.getText().trim()));
 
@@ -196,6 +226,7 @@ public class Controller implements Initializable {
         }
     }
 
+    /** метод изменяет название шапки, добавляет туда Nick после прохождения аутентификации*/
     private void setTitle(String nickname) {
         Platform.runLater(() -> {
             if (nickname.equals("")) {
@@ -206,12 +237,15 @@ public class Controller implements Initializable {
         });
     }
 
+    /** метод автоматически прописывает команду для того чтобы можно было посылать
+     *  личные сообщения при клике на клиента из списка клиентов*/
     public void clientListMouseReleased(MouseEvent mouseEvent) {
         System.out.println(clientList.getSelectionModel().getSelectedItem());
         String msg = String.format("%s %s ", Command.PRIVATE_MSG, clientList.getSelectionModel().getSelectedItem());
         textField.setText(msg);
     }
 
+    /** метод делает окно регистрации видимым при нажатии на кнопку Reg*/
     public void showRegWindow(ActionEvent actionEvent) {
         if (regStage == null) {
             initRegWindow();
@@ -219,6 +253,7 @@ public class Controller implements Initializable {
         regStage.show();
     }
 
+    /** метод создает окно регистрации с механикой всех кнопок*/
     private void initRegWindow() {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/reg.fxml"));
@@ -238,6 +273,7 @@ public class Controller implements Initializable {
         }
     }
 
+    /** метод посылает на сервер данные юзера для регистрации*/
     public void registration(String login, String password, String nickname){
         if (socket == null || socket.isClosed()) {
             connect();
@@ -248,4 +284,46 @@ public class Controller implements Initializable {
             e.printStackTrace();
         }
     }
+
+    /** метод делает окно изменения имени видимым при нажатии на кнопку ChengNick*/
+    public void showChengNickNameWindow(ActionEvent actionEvent) {
+        if (chengNickNameStage == null) {
+            initChengNickNameWindow();
+        }
+        chengNickNameStage.show();
+    }
+
+    /** метод создает окно изменения имени с механикой всех кнопок*/
+    private void initChengNickNameWindow() {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/chengNickName.fxml"));
+            Parent root = fxmlLoader.load();
+
+            chengNickNameController = fxmlLoader.getController();
+            chengNickNameController.setController(this);
+
+            chengNickNameStage = new Stage();
+            chengNickNameStage.setTitle("Best chat of World registration");
+            chengNickNameStage.setScene(new Scene(root, 450, 350));
+            chengNickNameStage.initStyle(StageStyle.UTILITY);
+            chengNickNameStage.initModality(Modality.APPLICATION_MODAL);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /** метод посылает на сервер данные юзера для проверки сушествует ли Nick
+     * на который юзер хочет поменять старый Nick*/
+    public void chengNickName(String login, String password, String nickname, String newNickName){
+        if (socket == null || socket.isClosed()) {
+            connect();
+        }
+        try {
+            out.writeUTF(String.format("%s %s %s %s %s", Command.CHENGNICKNAME, login, password, nickname, newNickName));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

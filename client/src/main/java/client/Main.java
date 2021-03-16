@@ -6,7 +6,10 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+
 public class Main extends Application {
+
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -14,6 +17,7 @@ public class Main extends Application {
         primaryStage.setTitle("Best chat of World");
         primaryStage.setScene(new Scene(root, 500, 375));
         primaryStage.show();
+
     }
 
 

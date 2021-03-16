@@ -51,13 +51,13 @@ public class ClientHandler {
                             if (newNick != null) {
                                 if (!server.isLoginAuthenticated(login)) {
                                     nickname = newNick;
-                                    sendMsg(Command.AUTH_OK + " " + nickname);
+                                    sendMsg(Command.AUTH_OK + " " + nickname +" "+login);
                                     server.subscribe(this);
                                     System.out.println("client: " + socket.getRemoteSocketAddress() +
                                             " connected with nick: " + nickname);
                                     socket.setSoTimeout(0);
                                     //==============//
-                                    sendMsg(SQLHandler.getMessageForNick(nickname));
+                                  //  sendMsg(SQLHandler.getMessageForNick(nickname));
                                     //==============//
                                     break;
                                 } else {
@@ -103,6 +103,7 @@ public class ClientHandler {
                             }
 
                             //==============//
+
                             if (str.startsWith("/chnick ")) {
                                 String[] token = str.split("\\s+", 2);
                                 if (token.length < 2) {
